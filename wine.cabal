@@ -13,3 +13,4 @@ executable          wine
                   , text 
                   , bytestring
                   , aeson
+                  , sqlite-simple
