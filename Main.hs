@@ -16,20 +16,24 @@ data WineType
     = Red
     | White
     | Sparkling
-    deriving (Show, Eq, Generic)
+    deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON WineType
 instance ToJSON WineType where
     toEncoding = genericToEncoding defaultOptions
 instance FromField WineType where
-    fromField f mdata =
+    fromField n = case n of
+            0 -> return Red
+            1 -> return White
+            _ -> return Sparkling
+{-
+    fromField _ mdata =
         return wineType
-        where wineType =
-            case mdata of
-                (Just 0) -> Red
-                (Just 1) -> White
+        where wineType = case mdata of
+                Just 0 -> Red
+                Just 1 -> White
                 _      -> Sparkling
-
+-}
 
 -- Data constructor for bottle
 data Bottle = Bottle
@@ -50,7 +54,7 @@ instance FromJSON Bottle
 instance ToJSON Bottle where
     toEncoding = genericToEncoding defaultOptions
 instance FromRow Bottle where
-    fromRow = Bottle <$> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field
+    fromRow = Bottle <$> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field
 
 getBottle :: Int -> Bottle
 getBottle bottleId = (Bottle bottleId "Quaranta" "Pennessi" Red "Italy" "Tuscany" (Just "Montepulciano") Nothing (Just 2020) (Just 190))
