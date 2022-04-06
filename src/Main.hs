@@ -1,7 +1,9 @@
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Aeson.Types
+import qualified Data.Maybe
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromField
@@ -18,10 +20,8 @@ data WineType
     deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON WineType
-
 instance ToJSON WineType where
     toEncoding = genericToEncoding defaultOptions
-
 instance FromField WineType where
     fromField f = case fieldData f of
         (SQLText "Red") -> return Red
@@ -34,7 +34,6 @@ instance FromField WineType where
                 f
                 ("Illegal value: '" ++ T.unpack other ++ "'")
         _ -> returnError Incompatible f "Could not parse WineType"
-
 instance ToField WineType where
     toField wt = case wt of
         Red -> SQLText "Red"
@@ -44,34 +43,25 @@ instance ToField WineType where
 
 -- Data constructor for bottle
 data Bottle = Bottle
-    { name :: String
-    , -- e.g. Romanée-Conti
-      producer :: String
-    , -- e.g. Domaine de la Romanée-Conti
-      wineType :: WineType
-    , -- e.g. Red
-      country :: String
-    , -- e.g. France
-      region :: String
-    , -- e.g. Burgundy
-      subRegion :: Maybe String
-    , -- e.g. Vosne-Romanée
-      vineyard :: Maybe String
-    , -- e.g. La Romanée-Conti
-      vintage :: Maybe Int
-    , -- e.g. 1998 - if Nothing, implies it's a NV
-      cost :: Maybe Int -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
+    { name :: String -- e.g. Romanée-Conti
+    , producer :: String -- e.g. Domaine de la Romanée-Conti
+    , wineType :: WineType -- e.g. Red
+    , country :: String -- e.g. France
+    , region :: String -- e.g. Burgundy
+    , subRegion :: Maybe String -- e.g. Vosne-Romanée
+    , vineyard :: Maybe String -- e.g. La Romanée-Conti
+    , vintage :: Maybe Int -- e.g. 1998 - if Nothing, implies it's a NV (or that vintage is unknown)
+    , cost :: Maybe Int -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
     }
     deriving (Show, Eq, Generic)
 
 instance FromJSON Bottle
-
 instance ToJSON Bottle where
     toEncoding = genericToEncoding defaultOptions
-
 instance FromRow Bottle where
     fromRow =
-        Bottle <$> field
+        Bottle
+            <$> field
             <*> field
             <*> field
             <*> field
@@ -81,6 +71,7 @@ instance FromRow Bottle where
             <*> field
             <*> field
 
+-- TODO: Clean this up and make it this more generic
 instance ToRow Bottle where
     toRow
         ( Bottle
@@ -89,20 +80,20 @@ instance ToRow Bottle where
                 wineType
                 country
                 region
-                (Just subRegion)
-                (Just vineyard)
-                (Just vintage)
-                (Just cost)
+                subRegion
+                vineyard
+                vintage
+                cost
             ) =
             [ SQLText (T.pack name)
             , SQLText (T.pack producer)
             , toField wineType
             , SQLText (T.pack country)
             , SQLText (T.pack region)
-            , SQLText (T.pack subRegion)
-            , SQLText (T.pack vineyard)
-            , SQLInteger (fromIntegral vintage)
-            , SQLInteger (fromIntegral cost)
+            , SQLText (T.pack (Data.Maybe.fromMaybe "" subRegion))
+            , SQLText (T.pack (Data.Maybe.fromMaybe "" vineyard))
+            , SQLInteger (fromIntegral (Data.Maybe.fromMaybe 0 vintage))
+            , SQLInteger (fromIntegral (Data.Maybe.fromMaybe 0 cost))
             ]
 
 getBottle :: Int -> Bottle
