@@ -5,7 +5,7 @@ build-type:    Simple
 
 executable          wine
     hs-source-dirs: .
-    main-is:        Main.hs
+    main-is:        src/Main.hs
     ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:     OverloadedStrings
     build-depends:  base   >= 4      && < 5
