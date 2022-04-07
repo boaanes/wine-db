@@ -3,7 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.Aeson.Types
-import qualified Data.Maybe
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromField
@@ -85,16 +84,24 @@ instance ToRow Bottle where
                 vintage
                 cost
             ) =
-            [ SQLText (T.pack name)
-            , SQLText (T.pack producer)
+            [ SQLText $ T.pack name
+            , SQLText $ T.pack producer
             , toField wineType
-            , SQLText (T.pack country)
-            , SQLText (T.pack region)
-            , SQLText (T.pack (Data.Maybe.fromMaybe "" subRegion))
-            , SQLText (T.pack (Data.Maybe.fromMaybe "" vineyard))
-            , SQLInteger (fromIntegral (Data.Maybe.fromMaybe 0 vintage))
-            , SQLInteger (fromIntegral (Data.Maybe.fromMaybe 0 cost))
+            , SQLText $ T.pack country
+            , SQLText $ T.pack region
+            , stringToSQLval subRegion
+            , stringToSQLval vineyard
+            , intToSQLval vintage
+            , intToSQLval cost
             ]
+
+intToSQLval :: Maybe Int -> SQLData
+intToSQLval (Just val) = SQLInteger $ fromIntegral val
+intToSQLval Nothing = SQLNull
+
+stringToSQLval :: Maybe String -> SQLData
+stringToSQLval (Just val) = SQLText $ T.pack val
+stringToSQLval Nothing = SQLNull
 
 getBottle :: Int -> Bottle
 getBottle _ =
