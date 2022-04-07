@@ -4,10 +4,12 @@ cabal-version: >= 1.8
 build-type:    Simple
 
 executable          wine
-    hs-source-dirs: .
-    main-is:        src/Main.hs
+    hs-source-dirs: src/
+    main-is:        Main.hs
     ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:     OverloadedStrings
+    other-modules:
+                    Schema
     build-depends:  base   >= 4      && < 5
                   , scotty
                   , text 
