@@ -2,12 +2,12 @@
 
 module Schema where
 
-import Data.Aeson.Types
-import qualified Data.Text as T
-import Database.SQLite.Simple
-import Database.SQLite.Simple.FromField
-import Database.SQLite.Simple.ToField (ToField (..))
-import GHC.Generics
+import           Data.Aeson.Types
+import qualified Data.Text                        as T
+import           Database.SQLite.Simple
+import           Database.SQLite.Simple.FromField
+import           Database.SQLite.Simple.ToField   (ToField (..))
+import           GHC.Generics
 
 -- Data constructor for wine type
 data WineType
@@ -36,22 +36,22 @@ instance FromField WineType where
     _ -> returnError Incompatible f "Could not parse WineType"
 
 instance ToField WineType where
-  toField Red = SQLText "Red"
-  toField White = SQLText "White"
-  toField Rose = SQLText "Rose"
+  toField Red       = SQLText "Red"
+  toField White     = SQLText "White"
+  toField Rose      = SQLText "Rose"
   toField Sparkling = SQLText "Sparkling"
 
 -- Data constructor for bottle
 data Bottle = Bottle
-  { name :: String, -- e.g. Romanée-Conti
-    producer :: String, -- e.g. Domaine de la Romanée-Conti
-    wineType :: WineType, -- e.g. Red
-    country :: String, -- e.g. France
-    region :: String, -- e.g. Burgundy
-    subRegion :: Maybe String, -- e.g. Vosne-Romanée
-    vineyard :: Maybe String, -- e.g. La Romanée-Conti
-    vintage :: Maybe Int, -- e.g. 1998 - if Nothing, implies it's a NV (or that vintage is unknown)
-    cost :: Maybe Int -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
+  { name      :: String,        -- e.g. Romanée-Conti
+    producer  :: String,        -- e.g. Domaine de la Romanée-Conti
+    wineType  :: WineType,      -- e.g. Red
+    country   :: String,        -- e.g. France
+    region    :: String,        -- e.g. Burgundy
+    subRegion :: Maybe String,  -- e.g. Vosne-Romanée
+    vineyard  :: Maybe String,  -- e.g. La Romanée-Conti
+    vintage   :: Maybe Int,     -- e.g. 1998 - if Nothing, implies it's a NV (or that vintage is unknown)
+    cost      :: Maybe Int      -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
   }
   deriving (Show, Eq, Generic)
 

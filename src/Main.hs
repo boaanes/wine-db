@@ -1,11 +1,11 @@
-{-# LANGUAGE BlockArguments #-}
+{-# LANGUAGE BlockArguments    #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-import Control.Monad.IO.Class
-import Database.SQLite.Simple
-import Queries
-import Schema
-import Web.Scotty
+import           Control.Monad.IO.Class
+import           Database.SQLite.Simple
+import           Queries
+import           Schema
+import           Web.Scotty
 
 initializeDB :: IO ()
 initializeDB = do
