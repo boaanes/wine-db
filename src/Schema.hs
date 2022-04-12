@@ -6,7 +6,7 @@ import Data.Aeson.Types
 import qualified Data.Text as T
 import Database.SQLite.Simple
 import Database.SQLite.Simple.FromField
-import Database.SQLite.Simple.ToField
+import Database.SQLite.Simple.ToField (ToField (..))
 import GHC.Generics
 
 -- Data constructor for wine type
@@ -36,11 +36,10 @@ instance FromField WineType where
     _ -> returnError Incompatible f "Could not parse WineType"
 
 instance ToField WineType where
-  toField wt = case wt of
-    Red -> SQLText "Red"
-    White -> SQLText "White"
-    Rose -> SQLText "Rose"
-    Sparkling -> SQLText "Sparkling"
+  toField Red = SQLText "Red"
+  toField White = SQLText "White"
+  toField Rose = SQLText "Rose"
+  toField Sparkling = SQLText "Sparkling"
 
 -- Data constructor for bottle
 data Bottle = Bottle
@@ -62,47 +61,17 @@ instance ToJSON Bottle where
   toEncoding = genericToEncoding defaultOptions
 
 instance FromRow Bottle where
-  fromRow =
-    Bottle
-      <$> field
-      <*> field
-      <*> field
-      <*> field
-      <*> field
-      <*> field
-      <*> field
-      <*> field
-      <*> field
+  fromRow = Bottle <$> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field <*> field
 
--- TODO: Clean this up and make it this more generic
 instance ToRow Bottle where
-  toRow
-    ( Bottle
-        name
-        producer
-        wineType
-        country
-        region
-        subRegion
-        vineyard
-        vintage
-        cost
-      ) =
-      [ SQLText $ T.pack name,
-        SQLText $ T.pack producer,
-        toField wineType,
-        SQLText $ T.pack country,
-        SQLText $ T.pack region,
-        stringToSQLval subRegion,
-        stringToSQLval vineyard,
-        intToSQLval vintage,
-        intToSQLval cost
-      ]
-
-intToSQLval :: Maybe Int -> SQLData
-intToSQLval (Just val) = SQLInteger $ fromIntegral val
-intToSQLval Nothing = SQLNull
-
-stringToSQLval :: Maybe String -> SQLData
-stringToSQLval (Just val) = SQLText $ T.pack val
-stringToSQLval Nothing = SQLNull
+  toRow b =
+    [ toField (name b),
+      toField (producer b),
+      toField (wineType b),
+      toField (country b),
+      toField (region b),
+      toField (subRegion b),
+      toField (vineyard b),
+      toField (vintage b),
+      toField (cost b)
+    ]

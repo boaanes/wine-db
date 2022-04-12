@@ -1,31 +1,16 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import Control.Monad.IO.Class
 import Database.SQLite.Simple
 import Schema
 import Web.Scotty
 
-getBottle :: Int -> Bottle
-getBottle _ =
-  Bottle
-    "Quaranta"
-    "Pennessi"
-    Red
-    "Italy"
-    "Tuscany"
-    (Just "Montepulciano")
-    Nothing
-    (Just 2020)
-    (Just 190)
-
-{-
-main :: IO ()
-main = do
-    conn <- open "wine.db"
-    r <- query_ conn "SELECT * FROM bottles" :: IO [Bottle]
-    mapM_ print r
-    close conn
--}
+initializeDB :: IO ()
+initializeDB = do
+  conn <- open "wine.db"
+  execute_ conn "CREATE TABLE IF NOT EXISTS bottles (id INTEGER PRIMARY KEY, name TEXT, producer TEXT, wineType TEXT, country TEXT, region TEXT, subRegion TEXT, vineyard TEXT, vintage INTEGER, cost INTEGER)"
+  close conn
 
 insertBottle :: Bottle -> IO ()
 insertBottle bottle = do
@@ -36,26 +21,22 @@ insertBottle bottle = do
     bottle
   close conn
 
-getBottleById :: Int -> IO ()
-getBottleById id = do
-  conn <- open "wine.db"
-  r <-
-    queryNamed
-      conn
-      "SELECT * FROM bottles WHERE id = :id"
-      [":id" := (id :: Int)]
-  mapM_ (mapM_ putStrLn) (r :: [[String]])
-  close conn
+routes :: Connection -> ScottyM ()
+routes conn = do
+  get "/" $ do
+    r <- liftIO $ query_ conn "SELECT name, producer, wineType, country, region, subRegion, vineyard, vintage, cost FROM bottles" :: ActionM [Bottle]
+    json r
+  get "/:id" $ do
+    bid <- param "id" :: ActionM Int
+    r <- liftIO $ queryNamed conn "SELECT name, producer, wineType, country, region, subRegion, vineyard, vintage, cost FROM bottles WHERE id = :id" [":id" := bid] :: ActionM [Bottle]
+    json r
+  post "/" $ do
+    bottle <- jsonData :: ActionM Bottle
+    liftIO $ insertBottle bottle
+    json bottle
 
 main :: IO ()
-main = scotty 3000 $
-  do
-    get "/bottle/:bottleId" $
-      do
-        rawId <- param "bottleId"
-        let bottleId = read rawId :: Int
-        json $ getBottle bottleId
-    post "/bottle" $
-      do
-        parsedJson <- jsonData :: ActionM Bottle
-        json parsedJson
+main = do
+  initializeDB
+  conn <- open "wine.db"
+  scotty 3000 $ routes conn
