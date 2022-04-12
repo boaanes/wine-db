@@ -3,13 +3,14 @@
 
 import Control.Monad.IO.Class
 import Database.SQLite.Simple
+import Queries
 import Schema
 import Web.Scotty
 
 initializeDB :: IO ()
 initializeDB = do
   conn <- open "wine.db"
-  execute_ conn "CREATE TABLE IF NOT EXISTS bottles (id INTEGER PRIMARY KEY, name TEXT, producer TEXT, wineType TEXT, country TEXT, region TEXT, subRegion TEXT, vineyard TEXT, vintage INTEGER, cost INTEGER)"
+  execute_ conn createBottlesTableQuery
   close conn
 
 insertBottle :: Bottle -> IO ()
@@ -17,18 +18,18 @@ insertBottle bottle = do
   conn <- open "wine.db"
   execute
     conn
-    "INSERT INTO bottles (name, producer, wineType, country, region, subRegion, vineyard, vintage, cost) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    insertBottleQuery
     bottle
   close conn
 
 routes :: Connection -> ScottyM ()
 routes conn = do
   get "/" $ do
-    r <- liftIO $ query_ conn "SELECT name, producer, wineType, country, region, subRegion, vineyard, vintage, cost FROM bottles" :: ActionM [Bottle]
+    r <- liftIO $ query_ conn getAllBottlesQuery :: ActionM [Bottle]
     json r
   get "/:id" $ do
     bid <- param "id" :: ActionM Int
-    r <- liftIO $ queryNamed conn "SELECT name, producer, wineType, country, region, subRegion, vineyard, vintage, cost FROM bottles WHERE id = :id" [":id" := bid] :: ActionM [Bottle]
+    r <- liftIO $ queryNamed conn getBottleByIDQuery [":id" := bid] :: ActionM [Bottle]
     json r
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
