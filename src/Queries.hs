@@ -13,3 +13,11 @@ getAllBottlesQuery = "SELECT name, producer, wineType, country, region, subRegio
 
 getBottleByIDQuery :: Query
 getBottleByIDQuery = "SELECT name, producer, wineType, country, region, subRegion, vineyard, vintage, cost FROM bottles WHERE id = :id"
+
+deleteBottleByIDQuery :: Query
+deleteBottleByIDQuery = "DELETE FROM bottles WHERE id = :id"
+
+-- update bottle function using bottle record defined in Schema.hs
+updateBottleByIDQuery :: Query
+updateBottleByIDQuery = "UPDATE bottles SET name = :name, producer = :producer, wineType = :wineType, country = :country, region = :region, subRegion = :subRegion, vineyard = :vineyard, vintage = :vintage, cost = :cost WHERE id = :id"
+

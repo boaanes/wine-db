@@ -16,10 +16,7 @@ initializeDB = do
 insertBottle :: Bottle -> IO ()
 insertBottle bottle = do
   conn <- open "wine.db"
-  execute
-    conn
-    insertBottleQuery
-    bottle
+  execute conn insertBottleQuery bottle
   close conn
 
 routes :: Connection -> ScottyM ()
@@ -34,6 +31,27 @@ routes conn = do
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ insertBottle bottle
+    json bottle
+  delete "/:id" $ do
+    bid <- param "id" :: ActionM Int
+    liftIO $ executeNamed conn deleteBottleByIDQuery [":id" := bid]
+    json ()
+  put "/:id" $ do
+    bid <- param "id" :: ActionM Int
+    bottle <- jsonData :: ActionM Bottle
+    liftIO $
+      executeNamed conn updateBottleByIDQuery
+        [ ":id" := bid
+        , ":name" := name bottle
+        , ":producer" := producer bottle
+        , ":wineType" := wineType bottle
+        , ":country" := country bottle
+        , ":region" := region bottle
+        , ":subRegion" := subRegion bottle
+        , ":vineyard" := vineyard bottle
+        , ":vintage" := vintage bottle
+        , ":cost" := cost bottle
+        ]
     json bottle
 
 main :: IO ()
