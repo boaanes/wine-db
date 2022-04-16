@@ -1,4 +1,5 @@
 {-# LANGUAGE BlockArguments    #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Control.Monad.IO.Class
@@ -10,48 +11,29 @@ import           Web.Scotty
 initializeDB :: IO ()
 initializeDB = do
   conn <- open "wine.db"
-  execute_ conn createBottlesTableQuery
-  close conn
-
-insertBottle :: Bottle -> IO ()
-insertBottle bottle = do
-  conn <- open "wine.db"
-  execute conn insertBottleQuery bottle
+  execute_ conn "CREATE TABLE IF NOT EXISTS bottles (id INTEGER PRIMARY KEY, name TEXT, producer TEXT, wine_type TEXT, country TEXT, region TEXT, sub_region TEXT, vineyard TEXT, vintage INTEGER, cost INTEGER)"
   close conn
 
 routes :: Connection -> ScottyM ()
 routes conn = do
   get "/" $ do
-    r <- liftIO $ query_ conn getAllBottlesQuery :: ActionM [Bottle]
-    json r
+    bs <- liftIO $ getBottles conn
+    json bs
   get "/:id" $ do
     bid <- param "id" :: ActionM Int
-    r <- liftIO $ queryNamed conn getBottleByIDQuery [":id" := bid] :: ActionM [Bottle]
-    json r
+    Just b <- liftIO $ getBottleByID conn (fromIntegral bid)
+    json b
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
-    liftIO $ insertBottle bottle
+    liftIO $ postBottle conn bottle
     json bottle
   delete "/:id" $ do
     bid <- param "id" :: ActionM Int
-    liftIO $ executeNamed conn deleteBottleByIDQuery [":id" := bid]
+    liftIO $ deleteBottleByID conn (fromIntegral bid)
     json ()
-  put "/:id" $ do
-    bid <- param "id" :: ActionM Int
+  put "/" $ do
     bottle <- jsonData :: ActionM Bottle
-    liftIO $
-      executeNamed conn updateBottleByIDQuery
-        [ ":id" := bid
-        , ":name" := name bottle
-        , ":producer" := producer bottle
-        , ":wineType" := wineType bottle
-        , ":country" := country bottle
-        , ":region" := region bottle
-        , ":subRegion" := subRegion bottle
-        , ":vineyard" := vineyard bottle
-        , ":vintage" := vintage bottle
-        , ":cost" := cost bottle
-        ]
+    liftIO $ updateBottle conn bottle
     json bottle
 
 main :: IO ()

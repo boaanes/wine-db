@@ -17,3 +17,5 @@ executable          wine
                   , bytestring
                   , aeson
                   , sqlite-simple
+                  , beam-core
+                  , beam-sqlite
