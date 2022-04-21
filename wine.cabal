@@ -19,3 +19,4 @@ executable          wine
                   , sqlite-simple
                   , beam-core
                   , beam-sqlite
+                  , http-types

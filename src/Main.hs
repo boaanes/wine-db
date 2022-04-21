@@ -4,6 +4,7 @@
 
 import           Control.Monad.IO.Class
 import           Database.SQLite.Simple
+import           Network.HTTP.Types.Status
 import           Queries
 import           Schema
 import           Web.Scotty
@@ -21,8 +22,12 @@ routes conn = do
     json bs
   get "/:id" $ do
     bid <- param "id" :: ActionM Int
-    Just b <- liftIO $ getBottleByID conn (fromIntegral bid)
-    json b
+    b <- liftIO $ getBottleByID conn (fromIntegral bid)
+    case b of
+      Just bot -> json bot
+      Nothing  -> do
+        status notFound404
+        raw "No bottle found"
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ postBottle conn bottle
