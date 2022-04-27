@@ -32,6 +32,17 @@ instance HasSqlValueSyntax be String => HasSqlValueSyntax be WineType where
 instance FromBackendRow Sqlite WineType where
   fromBackendRow = read . T.unpack <$> fromBackendRow
 
+
+data Grape = Grape
+  { _grapeName       :: T.Text
+  , _grapePercentage :: T.Text
+  } deriving (Read, Show, Eq, Ord, Generic)
+
+data Blend = Blend
+  { _blendGrapes      :: [Grape]
+  } deriving (Read, Show, Eq, Ord, Generic)
+
+
 -- Data constructor for bottle
 data BottleT f
   = Bottle

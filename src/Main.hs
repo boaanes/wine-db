@@ -25,9 +25,7 @@ routes conn = do
     b <- liftIO $ getBottleByID conn (fromIntegral bid)
     case b of
       Just bot -> json bot
-      Nothing  -> do
-        status notFound404
-        raw "No bottle found"
+      Nothing  -> status notFound404 >> raw "Bottle not found"
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ postBottle conn bottle
