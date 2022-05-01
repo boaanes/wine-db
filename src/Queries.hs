@@ -26,16 +26,19 @@ postBottle' bottle =
   runInsert $
   insert (bottles wineDB) $
   insertExpressions [ Bottle
-                     { _bottleId = default_ -- handles autoincrement
-                     , _bottleName = val_ (_bottleName bottle)
-                     , _bottleProducer = val_ (_bottleProducer bottle)
-                     , _bottleWineType = val_ (_bottleWineType bottle)
-                     , _bottleCountry = val_ (_bottleCountry bottle)
-                     , _bottleRegion = val_ (_bottleRegion bottle)
-                     , _bottleSubRegion = val_ (_bottleSubRegion bottle)
-                     , _bottleVineyard = val_ (_bottleVineyard bottle)
-                     , _bottleVintage = val_ (_bottleVintage bottle)
-                     , _bottleCost = val_ (_bottleCost bottle)
+                     { _bottleId =
+                       if _bottleId bottle == -1
+                         then default_
+                         else val_ $ _bottleId bottle  -- autoincrement if no id is given, else use given id
+                     , _bottleName      = val_ $ _bottleName bottle
+                     , _bottleProducer  = val_ $ _bottleProducer bottle
+                     , _bottleWineType  = val_ $ _bottleWineType bottle
+                     , _bottleCountry   = val_ $ _bottleCountry bottle
+                     , _bottleRegion    = val_ $ _bottleRegion bottle
+                     , _bottleSubRegion = val_ $ _bottleSubRegion bottle
+                     , _bottleVineyard  = val_ $ _bottleVineyard bottle
+                     , _bottleVintage   = val_ $ _bottleVintage bottle
+                     , _bottleCost      = val_ $ _bottleCost bottle
                      }
                    ]
 

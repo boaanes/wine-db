@@ -11,6 +11,7 @@ executable          wine
     other-modules:
                     Schema
                     Queries
+                    PoletAPI
     build-depends:  base   >= 4      && < 5
                   , scotty
                   , text 
@@ -20,4 +21,5 @@ executable          wine
                   , beam-core
                   , beam-sqlite
                   , http-types
+                  , http-conduit
                   , HTTP
