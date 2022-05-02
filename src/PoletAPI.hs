@@ -58,21 +58,46 @@ instance FromJSON District where
 instance ToJSON District where
   toJSON (District c) = object ["code" .= c]
 
+newtype SubDistrict
+  = SubDistrict
+  { subDistrictCode :: T.Text
+  } deriving (Generic, Show)
+
+instance FromJSON SubDistrict where
+  parseJSON = withObject "SubDistrict" $ \o ->
+    SubDistrict <$> o .: "code"
+instance ToJSON SubDistrict where
+  toJSON (SubDistrict c) = object ["code" .= c]
+
+newtype Price
+  = Price
+  { value :: Double
+  } deriving (Generic, Show)
+
+instance FromJSON Price where
+  parseJSON = withObject "Price" $ \o ->
+    Price <$> o .: "value"
+instance ToJSON Price where
+  toJSON (Price v) = object ["value" .= v]
+
 data PoletResponse
   = PoletResponse
   { code          :: T.Text
   , name          :: T.Text
+  , price         :: Price
+  , year          :: T.Text
   , main_category :: MainCategory
   , main_country  :: MainCountry
   , main_producer :: MainProducer
   , district      :: District
+  , sub_District  :: Maybe SubDistrict
   } deriving (Generic, FromJSON, Show)
 
 instance ToJSON PoletResponse where
   toEncoding = genericToEncoding defaultOptions
 
 fromPoletResponseToBottle :: PoletResponse -> Bottle
-fromPoletResponseToBottle (PoletResponse c n (MainCategory mc) (MainCountry mc2) (MainProducer mp) (District d)) =
+fromPoletResponseToBottle (PoletResponse c n (Price v) y (MainCategory mc) (MainCountry mc2) (MainProducer mp) (District d) sd) =
   Bottle
   { _bottleId = read (T.unpack c) :: Int32
   , _bottleName = n
@@ -85,8 +110,10 @@ fromPoletResponseToBottle (PoletResponse c n (MainCategory mc) (MainCountry mc2)
     _                -> Other
   , _bottleCountry = mc2
   , _bottleRegion = d
-  , _bottleSubRegion = Nothing
+  , _bottleSubRegion = case sd of
+    Just (SubDistrict s) -> Just s
+    Nothing              -> Nothing
   , _bottleVineyard = Nothing
-  , _bottleVintage = Nothing
-  , _bottleCost = Nothing
+  , _bottleVintage = Just (read (T.unpack y) :: Int32)
+  , _bottleCost = Just v
   }

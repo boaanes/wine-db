@@ -45,7 +45,7 @@ data BottleT f
     _bottleSubRegion :: Columnar f (Maybe T.Text),    -- e.g. Vosne-Romanée
     _bottleVineyard  :: Columnar f (Maybe T.Text),    -- e.g. La Romanée-Conti
     _bottleVintage   :: Columnar f (Maybe Int32),     -- e.g. 1998 - if Nothing, implies it's a NV (or that vintage is unknown)
-    _bottleCost      :: Columnar f (Maybe Int32)      -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
+    _bottleCost      :: Columnar f (Maybe Double)     -- e.g. 35000, price in NOK - if Nothing, cost is unknown (perhaps gift?)
   }
   deriving (Generic)
 

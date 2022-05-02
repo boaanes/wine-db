@@ -15,7 +15,7 @@ import           Web.Scotty
 initializeDB :: IO ()
 initializeDB = do
   conn <- open "wine.db"
-  execute_ conn "CREATE TABLE IF NOT EXISTS bottles (id INTEGER PRIMARY KEY, name TEXT, producer TEXT, wine_type TEXT, country TEXT, region TEXT, sub_region TEXT, vineyard TEXT, vintage INTEGER, cost INTEGER)"
+  execute_ conn "CREATE TABLE IF NOT EXISTS bottles (id INTEGER PRIMARY KEY, name TEXT, producer TEXT, wine_type TEXT, country TEXT, region TEXT, sub_region TEXT, vineyard TEXT, vintage INTEGER, cost REAL)"
   close conn
 
 routes :: Connection -> ScottyM ()
@@ -35,7 +35,7 @@ routes conn = do
     json bottle
   post "/:id" $ do
     bid <- param "id" :: ActionM String
-    poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,main_category,main_country,main_producer,district"
+    poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,price,year,main_category,main_country,main_producer,district,sub_District"
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
       Just poletBottle -> json $ fromPoletResponseToBottle poletBottle
       Nothing          -> status notFound404 >> raw "Polet bottle not found"
