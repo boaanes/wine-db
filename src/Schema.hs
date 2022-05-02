@@ -22,6 +22,7 @@ data WineType
   | White
   | Rose
   | Sparkling
+  | Other
   deriving (Read, Show, Eq, Ord, Generic, Enum)
 
 instance FromJSON WineType

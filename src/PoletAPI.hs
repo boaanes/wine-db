@@ -82,7 +82,7 @@ fromPoletResponseToBottle (PoletResponse c n (MainCategory mc) (MainCountry mc2)
     "hvitvin"        -> White
     "rosévin"        -> Rose
     "musserende_vin" -> Sparkling
-    _                -> Red
+    _                -> Other
   , _bottleCountry = mc2
   , _bottleRegion = d
   , _bottleSubRegion = Nothing

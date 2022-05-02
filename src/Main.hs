@@ -33,7 +33,7 @@ routes conn = do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ postBottle conn bottle
     json bottle
-  post "/polet/:id" $ do
+  post "/:id" $ do
     bid <- param "id" :: ActionM String
     poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,main_category,main_country,main_producer,district"
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
