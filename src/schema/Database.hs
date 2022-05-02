@@ -16,6 +16,8 @@ import           Database.Beam
 import           Database.Beam.Backend
 import           Database.Beam.Sqlite
 
+--------------------------------------------------------------------------------
+
 -- Data constructor for wine type
 data WineType
   = Red
@@ -32,6 +34,40 @@ instance HasSqlValueSyntax be String => HasSqlValueSyntax be WineType where
   sqlValueSyntax = autoSqlValueSyntax
 instance FromBackendRow Sqlite WineType where
   fromBackendRow = read . T.unpack <$> fromBackendRow
+
+--------------------------------------------------------------------------------
+
+-- Data constructor for grape proportion used for blends
+data GrapeProportionT f
+  = GrapeProportion
+  { _grapeProportionId         :: Columnar f Int32,
+    _grapeProportionName       :: Columnar f T.Text,
+    _grapeProportionPercentage :: Columnar f Int32,
+    _grapeProportionBottleId   :: PrimaryKey BottleT f
+  }
+  deriving (Generic)
+
+type GrapeProportion = GrapeProportionT Identity
+type GrapeProportionID = PrimaryKey GrapeProportionT Identity
+
+deriving instance Show GrapeProportion
+deriving instance Eq GrapeProportion
+
+deriving instance Show GrapeProportionID
+deriving instance Eq GrapeProportionID
+
+instance Beamable GrapeProportionT
+instance Table GrapeProportionT where
+  data PrimaryKey GrapeProportionT f
+    = GrapeProportionId (Columnar f Int32)
+    deriving (Generic, Beamable)
+  primaryKey = GrapeProportionId . _grapeProportionId
+
+instance FromJSON (PrimaryKey BottleT Identity) => FromJSON GrapeProportion
+instance ToJSON (PrimaryKey BottleT Identity) => ToJSON GrapeProportion where
+  toEncoding = genericToEncoding defaultOptions
+
+--------------------------------------------------------------------------------
 
 -- Data constructor for bottle
 data BottleT f
@@ -52,16 +88,24 @@ data BottleT f
 
 type Bottle = BottleT Identity
 type BottleID = PrimaryKey BottleT Identity
+
 deriving instance Show Bottle
-deriving instance Show (PrimaryKey BottleT Identity)
+deriving instance Eq Bottle
+
+deriving instance Show BottleID
+deriving instance Eq BottleID
+
 instance Beamable BottleT
 instance Table BottleT where
   data PrimaryKey BottleT f = BottleId (Columnar f Int32)
                               deriving (Generic, Beamable)
   primaryKey = BottleId . _bottleId
+
 instance FromJSON Bottle
 instance ToJSON Bottle where
   toEncoding = genericToEncoding defaultOptions
+
+--------------------------------------------------------------------------------
 
 newtype WineDB f = WineDB { bottles :: f (TableEntity BottleT) } deriving (Generic)
 instance Database be WineDB
