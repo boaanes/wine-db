@@ -3,8 +3,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import           Control.Monad.IO.Class
+import           Data.Aeson                (decode)
 import           Database.SQLite.Simple
+import           Network.HTTP.Simple
 import           Network.HTTP.Types.Status
+import           PoletAPI
 import           Queries
 import           Schema
 import           Web.Scotty
@@ -30,6 +33,12 @@ routes conn = do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ postBottle conn bottle
     json bottle
+  post "/polet/:id" $ do
+    bid <- param "id" :: ActionM String
+    poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,main_category,main_country,main_producer,district"
+    case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
+      Just poletBottle -> json $ fromPoletResponseToBottle poletBottle
+      Nothing          -> status notFound404 >> raw "Polet bottle not found"
   delete "/:id" $ do
     bid <- param "id" :: ActionM Int
     liftIO $ deleteBottleByID conn (fromIntegral bid)
