@@ -7,7 +7,7 @@
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE UndecidableInstances  #-}
 
-module Schema where
+module Database where
 
 import           Data.Aeson.Types
 import           Data.Int

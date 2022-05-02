@@ -1,18 +1,13 @@
-{-# LANGUAGE DeriveAnyClass        #-}
-{-# LANGUAGE DeriveGeneric         #-}
-{-# LANGUAGE FlexibleContexts      #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE UndecidableInstances  #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric  #-}
 
-module PoletAPI where
+module Polet where
 
 import           Data.Aeson.Types
 import           Data.Int
 import qualified Data.Text        as T
+import           Database
 import           GHC.Generics
-import           Schema
 
 newtype MainCategory
   = MainCategory

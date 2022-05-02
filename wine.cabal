@@ -5,13 +5,17 @@ build-type:    Simple
 
 executable          wine
     hs-source-dirs: src/
+                    src/queries
+                    src/schema
+                    src/routes
     main-is:        Main.hs
     ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:     OverloadedStrings
     other-modules:
-                    Schema
+                    Database
+                    Polet
                     Queries
-                    PoletAPI
+                    Routes
     build-depends:  base   >= 4      && < 5
                   , scotty
                   , text 

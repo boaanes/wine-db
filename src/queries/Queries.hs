@@ -1,13 +1,10 @@
-{-# LANGUAGE BlockArguments    #-}
-{-# LANGUAGE FlexibleInstances #-}
-
 module Queries where
 
 import           Data.Int               (Int32)
+import           Database
 import           Database.Beam
 import           Database.Beam.Sqlite
 import           Database.SQLite.Simple
-import           Schema
 
 getBottleByID' :: Int32 -> SqliteM (Maybe Bottle)
 getBottleByID' bid =
