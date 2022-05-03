@@ -29,7 +29,10 @@ routes conn = do
     bid <- param "id" :: ActionM String
     poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,price,year,main_category,main_country,main_producer,district,sub_District"
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
-      Just poletBottle -> json $ fromPoletResponseToBottle poletBottle
+      Just poletBottle -> do
+        let bottle = fromPoletResponseToBottle poletBottle
+        liftIO $ postBottle conn $ bottle
+        json bottle
       Nothing          -> status notFound404 >> raw "Polet bottle not found"
   delete "/:id" $ do
     bid <- param "id" :: ActionM Int
