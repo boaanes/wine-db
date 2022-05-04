@@ -27,7 +27,7 @@ routes conn = do
     json bottle
   post "/:id" $ do
     bid <- param "id" :: ActionM String
-    poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=code,name,price,year,main_category,main_country,main_producer,district,sub_District"
+    poletResponse <- liftIO $ httpLbs $ parseRequest_ $ "http://www.vinmonopolet.no/api/products/" ++ bid ++ "?fields=FULL"
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
       Just poletBottle -> do
         let bottle = fromPoletResponseToBottle poletBottle

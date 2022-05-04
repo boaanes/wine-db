@@ -22,47 +22,47 @@ instance ToJSON MainCategory where
 
 newtype MainCountry
   = MainCountry
-  { countryCode :: T.Text
+  { countryName :: T.Text
   } deriving (Generic, Show)
 
 instance FromJSON MainCountry where
   parseJSON = withObject "MainCountry" $ \o ->
-    MainCountry <$> o .: "code"
+    MainCountry <$> o .: "name"
 instance ToJSON MainCountry where
-  toJSON (MainCountry c) = object ["code" .= c]
+  toJSON (MainCountry c) = object ["name" .= c]
 
 newtype MainProducer
   = MainProducer
-  { producerCode :: T.Text
+  { producerName :: T.Text
   } deriving (Generic, Show)
 
 instance FromJSON MainProducer where
   parseJSON = withObject "MainProducer" $ \o ->
-    MainProducer <$> o .: "code"
+    MainProducer <$> o .: "name"
 instance ToJSON MainProducer where
-  toJSON (MainProducer c) = object ["code" .= c]
+  toJSON (MainProducer c) = object ["name" .= c]
 
 newtype District
   = District
-  { districtCode :: T.Text
+  { districtName :: T.Text
   } deriving (Generic, Show)
 
 instance FromJSON District where
   parseJSON = withObject "District" $ \o ->
-    District <$> o .: "code"
+    District <$> o .: "name"
 instance ToJSON District where
-  toJSON (District c) = object ["code" .= c]
+  toJSON (District c) = object ["name" .= c]
 
 newtype SubDistrict
   = SubDistrict
-  { subDistrictCode :: T.Text
+  { subDistrictName :: T.Text
   } deriving (Generic, Show)
 
 instance FromJSON SubDistrict where
   parseJSON = withObject "SubDistrict" $ \o ->
-    SubDistrict <$> o .: "code"
+    SubDistrict <$> o .: "name"
 instance ToJSON SubDistrict where
-  toJSON (SubDistrict c) = object ["code" .= c]
+  toJSON (SubDistrict c) = object ["name" .= c]
 
 newtype Price
   = Price
