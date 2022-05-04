@@ -94,7 +94,8 @@ instance ToJSON PoletResponse where
 fromPoletResponseToBottle :: PoletResponse -> Bottle
 fromPoletResponseToBottle (PoletResponse c n (Price v) y (MainCategory mc) (MainCountry mc2) (MainProducer mp) (District d) sd) =
   Bottle
-  { _bottleId = read (T.unpack c) :: Int32
+  { _bottleId = -1
+  , _bottlePoletId = Just (read (T.unpack c) :: Int32)
   , _bottleName = n
   , _bottleProducer = mp
   , _bottleWineType = case mc of

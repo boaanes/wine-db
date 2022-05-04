@@ -32,10 +32,8 @@ insertBottle conn bottle =
   runInsert $
   insertOnConflict (bottles wineDB)
   (insertExpressions [ Bottle
-                     { _bottleId =
-                       if _bottleId bottle == -1
-                         then default_
-                         else val_ $ _bottleId bottle  -- autoincrement if no id is given, else use given id
+                     { _bottleId        = default_
+                     , _bottlePoletId   = val_ $ _bottlePoletId bottle
                      , _bottleName      = val_ $ _bottleName bottle
                      , _bottleProducer  = val_ $ _bottleProducer bottle
                      , _bottleWineType  = val_ $ _bottleWineType bottle
