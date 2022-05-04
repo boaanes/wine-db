@@ -13,7 +13,7 @@ import           Web.Scotty
 routes :: Connection -> ScottyM ()
 routes conn = do
   get "/" $ do
-    bs <- liftIO $ getBottles conn
+    bs <- liftIO $ getAllBottles conn
     json bs
   get "/:id" $ do
     bid <- param "id" :: ActionM Int
@@ -23,7 +23,7 @@ routes conn = do
       Nothing  -> status notFound404 >> raw "Bottle not found"
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
-    liftIO $ postBottle conn bottle
+    liftIO $ insertBottle conn bottle
     json bottle
   post "/:id" $ do
     bid <- param "id" :: ActionM String
@@ -31,7 +31,7 @@ routes conn = do
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
       Just poletBottle -> do
         let bottle = fromPoletResponseToBottle poletBottle
-        liftIO $ postBottle conn $ bottle
+        liftIO $ insertBottle conn $ bottle
         json bottle
       Nothing          -> status notFound404 >> raw "Polet bottle not found"
   delete "/:id" $ do
