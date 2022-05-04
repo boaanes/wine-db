@@ -6,20 +6,17 @@ import           Database.Beam
 import           Database.Beam.Sqlite
 import           Database.SQLite.Simple
 
-getBottleByID' :: Int32 -> SqliteM (Maybe Bottle)
-getBottleByID' bid =
+getBottleByID :: Connection -> Int32 -> IO (Maybe Bottle)
+getBottleByID conn bid =
+  runBeamSqlite conn $
   runSelectReturningOne $
   select $
   filter_ (\b -> _bottleId b ==. val_ bid) $
   all_ (bottles wineDB)
 
-getBottleByID :: Connection -> Int32 -> IO (Maybe Bottle)
-getBottleByID conn bid =
+postBottle :: Connection -> Bottle -> IO ()
+postBottle conn bottle =
   runBeamSqlite conn $
-  getBottleByID' bid
-
-postBottle' :: Bottle -> SqliteM ()
-postBottle' bottle =
   runInsert $
   insert (bottles wineDB) $
   insertExpressions [ Bottle
@@ -39,39 +36,20 @@ postBottle' bottle =
                      }
                    ]
 
-postBottle :: Connection -> Bottle -> IO ()
-postBottle conn bottle =
-  runBeamSqlite conn $
-  postBottle' bottle
-
-deleteBottleByID' :: Int32 -> SqliteM ()
-deleteBottleByID' bid =
-  runDelete $
-    delete (bottles wineDB)
-    (\b -> _bottleId b ==. val_ bid)
-
 deleteBottleByID :: Connection -> Int32 -> IO ()
 deleteBottleByID conn bid =
   runBeamSqlite conn $
-  deleteBottleByID' bid
+  runDelete $
+  delete (bottles wineDB)
+  (\b -> _bottleId b ==. val_ bid)
 
-updateBottle' :: Bottle -> SqliteM ()
-updateBottle' bottle =
-  runUpdate $
-    save (bottles wineDB) bottle
 
 updateBottle :: Connection -> Bottle -> IO ()
 updateBottle conn bottle =
   runBeamSqlite conn $
-  updateBottle' bottle
-
-getBottles' :: SqliteM [Bottle]
-getBottles' =
-  runSelectReturningList $
-  select $
-  all_ (bottles wineDB)
+  runUpdate $
+  save (bottles wineDB) bottle
 
 getBottles :: Connection -> IO [Bottle]
 getBottles conn =
-  runBeamSqlite conn
-  getBottles'
+  runBeamSqlite conn $ runSelectReturningList $ select $ all_ (bottles wineDB)
