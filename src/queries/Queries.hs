@@ -19,6 +19,14 @@ getBottleByID conn bid =
   filter_ (\b -> _bottleId b ==. val_ bid) $
   all_ (bottles wineDB)
 
+getBottleByPoletID :: Connection -> Int32 -> IO (Maybe Bottle)
+getBottleByPoletID conn pid =
+  runBeamSqlite conn $
+  runSelectReturningOne $
+  select $
+  filter_ (\b -> _bottlePoletId b ==. val_ (Just pid)) $
+  all_ (bottles wineDB)
+
 deleteBottleByID :: Connection -> Int32 -> IO ()
 deleteBottleByID conn bid =
   runBeamSqlite conn $
@@ -32,7 +40,7 @@ insertBottle conn bottle =
   runInsert $
   insertOnConflict (bottles wineDB)
   (insertExpressions [ Bottle
-                     { _bottleId        = default_
+                     { _bottleId        = if _bottleId bottle == -1 then default_ else val_ (_bottleId bottle)
                      , _bottlePoletId   = val_ $ _bottlePoletId bottle
                      , _bottleName      = val_ $ _bottleName bottle
                      , _bottleProducer  = val_ $ _bottleProducer bottle

@@ -21,6 +21,12 @@ routes conn = do
     case b of
       Just bot -> json bot
       Nothing  -> status notFound404 >> raw "Bottle not found"
+  get "/poletid/:id" $ do
+    pid <- param "id" :: ActionM Int
+    b <- liftIO $ getBottleByPoletID conn (fromIntegral pid)
+    case b of
+      Just bot -> json bot
+      Nothing  -> status notFound404 >> raw "Bottle not found"
   post "/" $ do
     bottle <- jsonData :: ActionM Bottle
     liftIO $ insertBottle conn bottle
