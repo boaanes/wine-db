@@ -6,6 +6,7 @@ import           Database.Beam
 import           Database.Beam.Backend.SQL.BeamExtensions
 import           Database.Beam.Sqlite
 import           Database.SQLite.Simple
+import           Polet                                    (grapeHelper)
 
 getAllBottles :: Connection -> IO [Bottle]
 getAllBottles conn =
@@ -55,6 +56,13 @@ insertBottle conn bottle =
                    ])
     (conflictingFields primaryKey)
     (onConflictUpdateSet (\fields _ -> fields <-. val_ bottle))
+
+insertGrapeProportions :: Connection -> [GrapeProportion] -> IO ()
+insertGrapeProportions conn gproportions =
+  runBeamSqlite conn $
+  runInsert $
+  insert (grape_proportions wineDB)
+  (insertExpressions (map grapeHelper gproportions))
 
 updateBottle :: Connection -> Bottle -> IO ()
 updateBottle conn bottle =

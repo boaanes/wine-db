@@ -40,10 +40,10 @@ instance FromBackendRow Sqlite WineType where
 -- Data constructor for grape proportion used for blends
 data GrapeProportionT f
   = GrapeProportion
-  { _grapeProportionId         :: Columnar f Int32,
-    _grapeProportionName       :: Columnar f T.Text,
-    _grapeProportionPercentage :: Columnar f Int32,
-    _grapeProportionBottleId   :: PrimaryKey BottleT f
+  { _grapeproportionId         :: Columnar f Int32,
+    _grapeproportionName       :: Columnar f T.Text,
+    _grapeproportionPercentage :: Columnar f Double,
+    _grapeproportionBottle     :: PrimaryKey BottleT f
   }
   deriving (Generic)
 
@@ -61,7 +61,7 @@ instance Table GrapeProportionT where
   data PrimaryKey GrapeProportionT f
     = GrapeProportionId (Columnar f Int32)
     deriving (Generic, Beamable)
-  primaryKey = GrapeProportionId . _grapeProportionId
+  primaryKey = GrapeProportionId . _grapeproportionId
 
 instance FromJSON (PrimaryKey BottleT Identity) => FromJSON GrapeProportion
 instance ToJSON (PrimaryKey BottleT Identity) => ToJSON GrapeProportion where
@@ -107,7 +107,11 @@ instance ToJSON Bottle where
 
 --------------------------------------------------------------------------------
 
-newtype WineDB f = WineDB { bottles :: f (TableEntity BottleT) } deriving (Generic)
+data WineDB f =
+  WineDB
+  { bottles           :: f (TableEntity BottleT)
+  , grape_proportions :: f (TableEntity GrapeProportionT)
+  } deriving (Generic)
 instance Database be WineDB
 
 wineDB :: DatabaseSettings be WineDB

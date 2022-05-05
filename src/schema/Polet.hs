@@ -1,13 +1,16 @@
-{-# LANGUAGE DeriveAnyClass #-}
-{-# LANGUAGE DeriveGeneric  #-}
+{-# LANGUAGE DeriveAnyClass   #-}
+{-# LANGUAGE DeriveGeneric    #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies     #-}
 
 module Polet where
 
 import           Data.Aeson.Types
 import           Data.Int
-import qualified Data.Text        as T
+import qualified Data.Text            as T
 import           Database
-import           GHC.Generics
+import           Database.Beam
+import           Database.Beam.Sqlite
 
 newtype MainCategory
   = MainCategory
@@ -75,6 +78,19 @@ instance FromJSON Price where
 instance ToJSON Price where
   toJSON (Price v) = object ["value" .= v]
 
+data Raastoff
+  = Raastoff
+  { raastaffName       :: T.Text
+  , raastaffPercentage :: T.Text
+  } deriving (Generic, Show)
+
+instance FromJSON Raastoff where
+  parseJSON = withObject "Raastoff" $ \o ->
+    Raastoff <$> o .: "name"
+             <*> o .: "percentage"
+instance ToJSON Raastoff where
+  toJSON (Raastoff n p) = object ["name" .= n, "percentage" .= p]
+
 data PoletResponse
   = PoletResponse
   { code          :: T.Text
@@ -86,30 +102,55 @@ data PoletResponse
   , main_producer :: MainProducer
   , district      :: District
   , sub_District  :: Maybe SubDistrict
+  , raastoff      :: Maybe [Raastoff]
   } deriving (Generic, FromJSON, Show)
 
 instance ToJSON PoletResponse where
   toEncoding = genericToEncoding defaultOptions
 
+grapeHelper :: GrapeProportion -> GrapeProportionT (QExpr Sqlite s')
+grapeHelper gp =
+  GrapeProportion
+  { _grapeproportionId = default_
+  , _grapeproportionName = val_ $ _grapeproportionName gp
+  , _grapeproportionPercentage = val_ $ _grapeproportionPercentage gp
+  , _grapeproportionBottle = val_ $ _grapeproportionBottle gp
+  }
+
+toGrape :: Bottle -> Raastoff -> GrapeProportion
+toGrape b (Raastoff n p) =
+  GrapeProportion
+  { _grapeproportionId = -1
+  , _grapeproportionName = n
+  , _grapeproportionPercentage = read (T.unpack p) :: Double
+  , _grapeproportionBottle = primaryKey b
+  }
+
+fromPoletResponseToGrapeProportions :: PoletResponse -> Bottle -> [GrapeProportion]
+fromPoletResponseToGrapeProportions pr bottle =
+  case raastoff pr of
+    Just r  -> map (toGrape bottle) r
+    Nothing -> []
+
 fromPoletResponseToBottle :: PoletResponse -> Bottle
-fromPoletResponseToBottle (PoletResponse c n (Price v) y (MainCategory mc) (MainCountry mc2) (MainProducer mp) (District d) sd) =
+fromPoletResponseToBottle pr =
   Bottle
   { _bottleId = -1
-  , _bottlePoletId = Just (read (T.unpack c) :: Int32)
-  , _bottleName = n
-  , _bottleProducer = mp
-  , _bottleWineType = case mc of
-    "rødvin"         -> Red
-    "hvitvin"        -> White
-    "rosévin"        -> Rose
-    "musserende_vin" -> Sparkling
-    _                -> Other
-  , _bottleCountry = mc2
-  , _bottleDistrict = d
-  , _bottleSubDistrict = case sd of
-    Just (SubDistrict s) -> Just s
-    Nothing              -> Nothing
+  , _bottlePoletId = Just (read (T.unpack (code pr)) :: Int32)
+  , _bottleName = name pr
+  , _bottleProducer = producerName (main_producer pr)
+  , _bottleWineType = case categoryCode (main_category pr) of
+                        "rødvin"         -> Red
+                        "hvitvin"        -> White
+                        "rosévin"        -> Rose
+                        "musserende_vin" -> Sparkling
+                        _                -> Other
+  , _bottleCountry = countryName $ main_country pr
+  , _bottleDistrict = districtName $ district pr
+  , _bottleSubDistrict = case sub_District pr of
+                           Just (SubDistrict s) -> Just s
+                           Nothing              -> Nothing
   , _bottleVineyard = Nothing
-  , _bottleVintage = Just (read (T.unpack y) :: Int32)
-  , _bottleCost = Just v
+  , _bottleVintage = Just (read (T.unpack (year pr)) :: Int32)
+  , _bottleCost = Just $ value $ price pr
   }

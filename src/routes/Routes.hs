@@ -37,7 +37,9 @@ routes conn = do
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
       Just poletBottle -> do
         let bottle = fromPoletResponseToBottle poletBottle
+        let grapeProportions = fromPoletResponseToGrapeProportions poletBottle bottle
         liftIO $ insertBottle conn bottle
+        liftIO $ insertGrapeProportions conn grapeProportions
         json bottle
       Nothing          -> status notFound404 >> raw "Polet bottle not found"
   delete "/:id" $ do
