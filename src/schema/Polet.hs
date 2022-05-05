@@ -105,8 +105,8 @@ fromPoletResponseToBottle (PoletResponse c n (Price v) y (MainCategory mc) (Main
     "musserende_vin" -> Sparkling
     _                -> Other
   , _bottleCountry = mc2
-  , _bottleRegion = d
-  , _bottleSubRegion = case sd of
+  , _bottleDistrict = d
+  , _bottleSubDistrict = case sd of
     Just (SubDistrict s) -> Just s
     Nothing              -> Nothing
   , _bottleVineyard = Nothing

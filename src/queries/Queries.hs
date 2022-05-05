@@ -40,17 +40,17 @@ insertBottle conn bottle =
   runInsert $
   insertOnConflict (bottles wineDB)
   (insertExpressions [ Bottle
-                     { _bottleId        = if _bottleId bottle == -1 then default_ else val_ (_bottleId bottle)
-                     , _bottlePoletId   = val_ $ _bottlePoletId bottle
-                     , _bottleName      = val_ $ _bottleName bottle
-                     , _bottleProducer  = val_ $ _bottleProducer bottle
-                     , _bottleWineType  = val_ $ _bottleWineType bottle
-                     , _bottleCountry   = val_ $ _bottleCountry bottle
-                     , _bottleRegion    = val_ $ _bottleRegion bottle
-                     , _bottleSubRegion = val_ $ _bottleSubRegion bottle
-                     , _bottleVineyard  = val_ $ _bottleVineyard bottle
-                     , _bottleVintage   = val_ $ _bottleVintage bottle
-                     , _bottleCost      = val_ $ _bottleCost bottle
+                     { _bottleId          = if _bottleId bottle == -1 then default_ else val_ (_bottleId bottle)
+                     , _bottlePoletId     = val_ $ _bottlePoletId bottle
+                     , _bottleName        = val_ $ _bottleName bottle
+                     , _bottleProducer    = val_ $ _bottleProducer bottle
+                     , _bottleWineType    = val_ $ _bottleWineType bottle
+                     , _bottleCountry     = val_ $ _bottleCountry bottle
+                     , _bottleDistrict    = val_ $ _bottleDistrict bottle
+                     , _bottleSubDistrict = val_ $ _bottleSubDistrict bottle
+                     , _bottleVineyard    = val_ $ _bottleVineyard bottle
+                     , _bottleVintage     = val_ $ _bottleVintage bottle
+                     , _bottleCost        = val_ $ _bottleCost bottle
                      }
                    ])
     (conflictingFields primaryKey)
