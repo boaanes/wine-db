@@ -16,6 +16,7 @@ executable          wine
                     Polet
                     Queries
                     Routes
+                    Json
     build-depends:  base   >= 4      && < 5
                   , scotty
                   , text 

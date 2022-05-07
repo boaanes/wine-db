@@ -5,6 +5,7 @@ import           Data.Aeson                (decode)
 import           Data.Int
 import           Database
 import           Database.SQLite.Simple
+import           Json                      (FullResponse (FullResponse))
 import           Network.HTTP.Simple
 import           Network.HTTP.Types.Status
 import           Polet
@@ -49,7 +50,8 @@ routes conn = do
         let grapeProportions = fromPoletResponseToGrapeProportions poletBottle bottle'
         liftIO $ insertGrapeProportions conn grapeProportions
 
-        json bottle
+        let fulres = FullResponse bottle grapeProportions
+        json fulres
 
   delete "/:id" $ do
     bid <- param "id" :: ActionM Int

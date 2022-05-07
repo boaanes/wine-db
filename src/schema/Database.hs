@@ -105,6 +105,9 @@ instance FromJSON Bottle
 instance ToJSON Bottle where
   toEncoding = genericToEncoding defaultOptions
 
+instance ToJSON BottleID where
+  toEncoding = genericToEncoding defaultOptions
+
 --------------------------------------------------------------------------------
 
 data WineDB f =
