@@ -50,8 +50,8 @@ routes conn = do
         let grapeProportions = fromPoletResponseToGrapeProportions poletBottle bottle'
         liftIO $ insertGrapeProportions conn grapeProportions
 
-        let fulres = FullResponse bottle grapeProportions
-        json fulres
+        Just grapeProportions' <- liftIO $ getGrapeProportionsByBottleID conn (read bid :: Int32)
+        json $ FullResponse bottle' grapeProportions
 
   delete "/:id" $ do
     bid <- param "id" :: ActionM Int

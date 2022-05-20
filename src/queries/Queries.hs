@@ -64,6 +64,16 @@ insertGrapeProportions conn gproportions =
   insert (grape_proportions wineDB)
   (insertExpressions (map grapeHelper gproportions))
 
+getGrapeProportionsByBottleID :: Connection -> Bottle -> IO (Maybe [GrapeProportion])
+getGrapeProportionsByBottleID conn bot =
+  runBeamSqlite conn $
+  runDeleteReturningList $
+  select $
+  filter_ (\g -> _grapeProportionBottleId g ==. val_ (_bottleId bot)) $
+  all_ (grape_proportions wineDB)
+
+
+
 updateBottle :: Connection -> Bottle -> IO ()
 updateBottle conn bottle =
   runBeamSqlite conn $
