@@ -11,23 +11,30 @@ import           Queries
 
 getAllBottles :: Connection -> IO [Bottle]
 getAllBottles conn =
-  runBeamSqlite conn $ runSelectReturningList $ select $ all_ (bottles wineDB)
+  runBeamSqlite conn $ runSelectReturningList $ select allBottles
+
+getAllBottlesWithBlend :: Connection -> IO [(Bottle, GrapeProportion)]
+getAllBottlesWithBlend conn =
+  runBeamSqlite conn $ runSelectReturningList $ select allBottlesWithBlends
+
+getAllGrapeProportions :: Connection -> IO [GrapeProportion]
+getAllGrapeProportions conn =
+  runBeamSqlite conn $ runSelectReturningList $ select allGrapeProportions
 
 getBottleByID :: Connection -> Int32 -> IO (Maybe Bottle)
 getBottleByID conn bid =
   runBeamSqlite conn $
   runSelectReturningOne $
   select $
-  filter_ (\b -> _bottleId b ==. val_ bid) $
-  all_ (bottles wineDB)
+  bottleById bid
 
 getBottleByPoletID :: Connection -> Int32 -> IO (Maybe Bottle)
 getBottleByPoletID conn pid =
   runBeamSqlite conn $
   runSelectReturningOne $
   select $
-  filter_ (\b -> _bottlePoletId b ==. val_ (Just pid)) $
-  all_ (bottles wineDB)
+  filter_ (\b -> _bottlePoletId b ==. val_ (Just pid))
+  allBottles
 
 deleteBottleByID :: Connection -> Int32 -> IO ()
 deleteBottleByID conn bid =
@@ -65,13 +72,15 @@ insertGrapeProportions conn gproportions =
   insert (grape_proportions wineDB)
   (insertExpressions (map grapeHelper gproportions))
 
-getGrapeProportionsByBottleID :: Connection -> Bottle -> IO [(Bottle, GrapeProportion)]
-getGrapeProportionsByBottleID conn bot =
-  runBeamSqlite conn $
-  runSelectReturningList $
-  select $
-  filter_ (\(b, _) -> _bottleId b ==. val_ (_bottleId bot))
-  allBottlesWithBlends
+getGrapeProportionsByBottleID :: Connection -> Bottle -> IO [GrapeProportion]
+getGrapeProportionsByBottleID conn bot = do
+  res <- runBeamSqlite conn $
+    runSelectReturningList $
+    select $
+    filter_ (\(b, _) -> _bottleId b ==. val_ (_bottleId bot))
+    allBottlesWithBlends
+  return $ map snd res
+
 
 updateBottle :: Connection -> Bottle -> IO ()
 updateBottle conn bottle =
