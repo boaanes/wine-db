@@ -14,7 +14,7 @@ executable          wine
     other-modules:
                     Database
                     Polet
-                    QueriesIO
+                    DBOperations
                     Queries
                     Routes
                     Json

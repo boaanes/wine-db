@@ -16,9 +16,8 @@ import           Database.Beam
 import           Database.Beam.Backend
 import           Database.Beam.Sqlite
 
---------------------------------------------------------------------------------
+-- * Data constructor for WineType
 
--- Data constructor for wine type
 data WineType
   = Red
   | White
@@ -35,9 +34,8 @@ instance HasSqlValueSyntax be String => HasSqlValueSyntax be WineType where
 instance FromBackendRow Sqlite WineType where
   fromBackendRow = read . T.unpack <$> fromBackendRow
 
---------------------------------------------------------------------------------
+-- * Data constructor for Grape Proportion table used for blends
 
--- Data constructor for grape proportion used for blends
 data GrapeProportionT f
   = GrapeProportion
   { _grapeproportionId         :: Columnar f Int32,
@@ -67,9 +65,8 @@ instance FromJSON (PrimaryKey BottleT Identity) => FromJSON GrapeProportion
 instance ToJSON (PrimaryKey BottleT Identity) => ToJSON GrapeProportion where
   toEncoding = genericToEncoding defaultOptions
 
---------------------------------------------------------------------------------
+-- * Data constructor for Bottle table
 
--- Data constructor for bottle
 data BottleT f
   = Bottle
   { _bottleId          :: Columnar f Int32             -- Primary key
@@ -108,7 +105,7 @@ instance ToJSON Bottle where
 instance ToJSON BottleID where
   toEncoding = genericToEncoding defaultOptions
 
---------------------------------------------------------------------------------
+-- * Data Constructor for database
 
 data WineDB f =
   WineDB

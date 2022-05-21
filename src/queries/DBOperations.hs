@@ -1,4 +1,4 @@
-module QueriesIO where
+module DBOperations where
 
 import           Data.Int                                 (Int32)
 import           Database
@@ -8,6 +8,8 @@ import           Database.Beam.Sqlite
 import           Database.SQLite.Simple
 import           Polet                                    (grapeHelper)
 import           Queries
+
+-- * Get data
 
 getAllBottles :: Connection -> IO [Bottle]
 getAllBottles conn =
@@ -36,12 +38,16 @@ getBottleByPoletID conn pid =
   filter_ (\b -> _bottlePoletId b ==. val_ (Just pid))
   allBottles
 
-deleteBottleByID :: Connection -> Int32 -> IO ()
-deleteBottleByID conn bid =
-  runBeamSqlite conn $
-  runDelete $
-  delete (bottles wineDB)
-  (\b -> _bottleId b ==. val_ bid)
+getGrapeProportionsByBottleID :: Connection -> Bottle -> IO [GrapeProportion]
+getGrapeProportionsByBottleID conn bot = do
+  res <- runBeamSqlite conn $
+    runSelectReturningList $
+    select $
+    filter_ (\(b, _) -> _bottleId b ==. val_ (_bottleId bot))
+    allBottlesWithBlends
+  return $ map snd res
+
+-- * Insert data
 
 insertBottle :: Connection -> Bottle -> IO ()
 insertBottle conn bottle =
@@ -72,15 +78,7 @@ insertGrapeProportions conn gproportions =
   insert (grape_proportions wineDB)
   (insertExpressions (map grapeHelper gproportions))
 
-getGrapeProportionsByBottleID :: Connection -> Bottle -> IO [GrapeProportion]
-getGrapeProportionsByBottleID conn bot = do
-  res <- runBeamSqlite conn $
-    runSelectReturningList $
-    select $
-    filter_ (\(b, _) -> _bottleId b ==. val_ (_bottleId bot))
-    allBottlesWithBlends
-  return $ map snd res
-
+-- * Update data
 
 updateBottle :: Connection -> Bottle -> IO ()
 updateBottle conn bottle =
@@ -93,3 +91,11 @@ updateGrapeProportion conn gproportion =
   runBeamSqlite conn $
   runUpdate $
   save (grape_proportions wineDB) gproportion
+
+-- * Delete data
+
+deleteBottleByID :: Connection -> Int32 -> IO ()
+deleteBottleByID conn bid =
+  runBeamSqlite conn $
+  runDelete $
+  delete (bottles wineDB) (\b -> _bottleId b ==. val_ bid)

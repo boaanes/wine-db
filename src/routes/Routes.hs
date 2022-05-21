@@ -2,6 +2,7 @@ module Routes where
 
 import           Control.Applicative
 import           Control.Monad.IO.Class
+import           DBOperations
 import           Data.Aeson                (decode)
 import           Data.Char
 import           Data.Int
@@ -14,7 +15,6 @@ import           Json                      (FullResponse (FullResponse))
 import           Network.HTTP.Simple
 import           Network.HTTP.Types.Status
 import           Polet
-import           QueriesIO
 import           Web.Scotty
 
 findQueryParam :: T.Text -> [Param] -> Maybe T.Text
