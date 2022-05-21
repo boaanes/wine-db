@@ -1,8 +1,12 @@
 module Routes where
 
+import           Control.Applicative
 import           Control.Monad.IO.Class
 import           Data.Aeson                (decode)
+import           Data.Char
 import           Data.Int
+import qualified Data.Text.Internal.Lazy   as T
+import qualified Data.Text.Lazy            as T
 import           Database
 import           Database.SQLite.Simple
 import           Json                      (FullResponse (FullResponse))
@@ -11,6 +15,10 @@ import           Network.HTTP.Types.Status
 import           Polet
 import           QueriesIO
 import           Web.Scotty
+
+findQueryParam :: T.Text -> [Param] -> Maybe T.Text
+findQueryParam key qparams =
+  lookup key qparams <|> Nothing
 
 routes :: Connection -> ScottyM ()
 routes conn = do
@@ -26,10 +34,20 @@ routes conn = do
       Nothing  -> status notFound404 >> raw "Bottle not found"
 
   get "/poletid/:id" $ do
-    pid <- param "id" :: ActionM Int
-    b <- liftIO $ getBottleByPoletID conn (fromIntegral pid)
+    bid <- param "id" :: ActionM Int
+    qparams <- params
+    let blend = case findQueryParam "blend" qparams of
+          Just b  -> map toLower (T.unpack b) == "true"
+          Nothing -> False
+
+    b <- liftIO $ getBottleByPoletID conn (fromIntegral bid)
     case b of
-      Just bot -> json bot
+      Just bot -> do
+        if blend
+          then do
+            gp <- liftIO $ getGrapeProportionsByBottleID conn bot
+            json $ FullResponse bot (map snd gp)
+          else json bot
       Nothing  -> status notFound404 >> raw "Bottle not found"
 
   post "/" $ do
