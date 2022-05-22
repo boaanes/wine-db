@@ -75,7 +75,7 @@ data BottleT f
   , _bottleProducer    :: Columnar f T.Text            -- e.g. Domaine de la Romanée-Conti
   , _bottleWineType    :: Columnar f WineType          -- e.g. Red
   , _bottleCountry     :: Columnar f T.Text            -- e.g. France
-  , _bottleDistrict    :: Columnar f T.Text            -- e.g. Burgundy
+  , _bottleDistrict    :: Columnar f (Maybe T.Text)    -- e.g. Burgundy
   , _bottleSubDistrict :: Columnar f (Maybe T.Text)    -- e.g. Vosne-Romanée
   , _bottleVineyard    :: Columnar f (Maybe T.Text)    -- e.g. La Romanée-Conti
   , _bottleVintage     :: Columnar f (Maybe Int32)     -- e.g. 1998 - if Nothing, implies it's a NV (or that vintage is unknown)

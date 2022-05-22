@@ -100,7 +100,7 @@ data PoletResponse
   , main_category :: MainCategory
   , main_country  :: MainCountry
   , main_producer :: MainProducer
-  , district      :: District
+  , district      :: Maybe District
   , sub_District  :: Maybe SubDistrict
   , raastoff      :: Maybe [Raastoff]
   } deriving (Generic, FromJSON, Show)
@@ -146,7 +146,9 @@ fromPoletResponseToBottle pr =
                         "musserende_vin" -> Sparkling
                         _                -> Other
   , _bottleCountry = countryName $ main_country pr
-  , _bottleDistrict = districtName $ district pr
+  , _bottleDistrict = case district pr of
+                        Just (District d) -> Just d
+                        Nothing           -> Nothing
   , _bottleSubDistrict = case sub_District pr of
                            Just (SubDistrict s) -> Just s
                            Nothing              -> Nothing

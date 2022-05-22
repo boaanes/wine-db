@@ -8,6 +8,7 @@ executable          wine
                     src/queries
                     src/schema
                     src/routes
+                    src/util
     main-is:        Main.hs
     ghc-options:    -Wall -threaded -O2 -rtsopts -with-rtsopts=-N
     extensions:     OverloadedStrings
@@ -18,6 +19,7 @@ executable          wine
                     Queries
                     Routes
                     Json
+                    Util
     build-depends:  base   >= 4      && < 5
                   , scotty
                   , text 

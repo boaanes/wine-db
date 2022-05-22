@@ -6,8 +6,8 @@ import           DBOperations
 import           Data.Aeson                (decode)
 import           Data.Char
 import           Data.Int
-import qualified Data.Text.Internal.Lazy   as T
-import qualified Data.Text.Lazy            as T
+import qualified Data.Text                 as DT
+import qualified Data.Text.Lazy            as DTL
 import           Database
 import           Database.Beam             (Table (primaryKey))
 import           Database.SQLite.Simple
@@ -15,16 +15,17 @@ import           Json                      (FullResponse (FullResponse))
 import           Network.HTTP.Simple
 import           Network.HTTP.Types.Status
 import           Polet
+import           Util
 import           Web.Scotty
 
-findQueryParam :: T.Text -> [Param] -> Maybe T.Text
+findQueryParam :: DTL.Text -> [Param] -> Maybe DTL.Text
 findQueryParam key qparams =
   lookup key qparams <|> Nothing
 
 blend :: [Param] -> Bool
 blend qparams =
   case findQueryParam "blend" qparams of
-    Just b  -> map toLower (T.unpack b) == "true"
+    Just b  -> map toLower (DTL.unpack b) == "true"
     Nothing -> False
 
 routes :: Connection -> ScottyM ()
@@ -55,6 +56,22 @@ routes conn = do
           else do
             json bot
       Nothing  -> status notFound404 >> raw "Bottle not found"
+
+  get "/grape/:grape" $ do
+    grape <- param "grape" :: ActionM DT.Text
+    qparams <- params
+
+    gps <- liftIO $ getAllGrapeProportions conn
+    bs <- liftIO $ getAllBottles conn
+
+    if blend qparams
+      then do
+        let res = [FullResponse b (filter (\g -> _grapeproportionBottle g == primaryKey b) gps) | b <- bs]
+        json $ filter (\(FullResponse _ g) -> capitalizeFirst grape `elem` map _grapeproportionName g ) res
+      else do
+        json $ filter (\b -> primaryKey b `elem` map _grapeproportionBottle
+                      (filter (\g -> _grapeproportionName g == capitalizeFirst grape) gps))
+                      bs
 
   get "/poletid/:id" $ do
     bid <- param "id" :: ActionM Int
