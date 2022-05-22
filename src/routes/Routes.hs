@@ -2,15 +2,14 @@ module Routes where
 
 import           Control.Applicative
 import           Control.Monad.IO.Class
-import           DBOperations
 import           Data.Aeson                (decode)
 import           Data.Char
-import           Data.Int
 import qualified Data.Text                 as DT
 import qualified Data.Text.Lazy            as DTL
 import           Database
 import           Database.Beam             (Table (primaryKey))
 import           Database.SQLite.Simple
+import           DBOperations
 import           Json                      (FullResponse (FullResponse))
 import           Network.HTTP.Simple
 import           Network.HTTP.Types.Status
@@ -98,12 +97,10 @@ routes conn = do
     case decode (getResponseBody poletResponse) :: Maybe PoletResponse of
       Nothing          -> status notFound404 >> raw "Bottle does not exist in Vinmonopolet"
       Just poletBottle -> do
-        let bid' = read bid :: Int32
-
         let bottle = fromPoletResponseToBottle poletBottle
         liftIO $ insertBottle conn bottle
 
-        Just bottle' <- liftIO $ getBottleByPoletID conn bid'
+        Just bottle' <- liftIO $ getLatestBottle conn
         let grapeProportions = fromPoletResponseToGrapeProportions poletBottle bottle'
         liftIO $ insertGrapeProportions conn grapeProportions
 

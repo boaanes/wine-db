@@ -35,7 +35,17 @@ getBottleByPoletID conn pid =
   runBeamSqlite conn $
   runSelectReturningOne $
   select $
+  limit_ 1 $
   filter_ (\b -> _bottlePoletId b ==. val_ (Just pid))
+  allBottles
+
+getLatestBottle :: Connection -> IO (Maybe Bottle)
+getLatestBottle conn =
+  runBeamSqlite conn $
+  runSelectReturningOne $
+  select $
+  limit_ 1 $
+  orderBy_ (desc_ . _bottleId)
   allBottles
 
 getGrapeProportionsByBottleID :: Connection -> Bottle -> IO [GrapeProportion]
